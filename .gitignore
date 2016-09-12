@@ -1,0 +1,8 @@
+node_modules
+pids
+static/files
+static/app/vendor
+static/app-build
+.idea
+.DS_Store
+*.log
