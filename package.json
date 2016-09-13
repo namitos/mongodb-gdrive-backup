@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "Service that backups a datatabase to google drive",
 	"main": "index.js",
-	"dependencies": {
+	"devDependencies": {
 		"googleapis": "12.4.x",
 		"moment": "x"
 	},
