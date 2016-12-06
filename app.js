@@ -1,12 +1,12 @@
-var fs = require('fs');
+let fs = require('fs');
 
-var google = require('googleapis');
-var drive = google.drive('v3');
-var moment = require('moment');
+let google = require('googleapis');
+let drive = google.drive('v3');
+let moment = require('moment');
 
-var conf = require(process.env.conf ? process.env.conf : './conf');
+let conf = require(process.env.conf ? process.env.conf : './conf');
 
-var jwtClient = new google.auth.JWT(conf.googleServiceAccount.client_email, null, conf.googleServiceAccount.private_key, [
+let jwtClient = new google.auth.JWT(conf.googleServiceAccount.client_email, null, conf.googleServiceAccount.private_key, [
 	'https://www.googleapis.com/auth/drive'
 ], null);
 google.options({auth: jwtClient});
@@ -60,17 +60,11 @@ function exec(command, options) {
 }
 
 function dump() {
-	var command = process.env.docker ? "./bin/mongodump" : "mongodump";
+	let command = process.env.docker ? "./bin/mongodump" : "mongodump";
 	exec(command + ' --host ' + (conf.mongo.host ? conf.mongo.host : '127.0.0.1') + ':' + (conf.mongo.port ? conf.mongo.port : 27017)).then(() => {
 		return exec('tar -cvzf dump.tar.gz dump && rm -rf dump');
 	}).then(() => {
-		return new Promise((resolve, reject) => {
-			fs.readFile('dump.tar.gz', (err, file) => {
-				err ? reject(err) : resolve(file);
-			});
-		});
-	}).then((file) => {
-		return sendBackup(conf.backup.shareTo, (conf.backup.fileName ? conf.backup.fileName : 'Backup') + ' ' + new Date().toString() + '.tar.gz', file);
+		return sendBackup(conf.backup.shareTo, (conf.backup.fileName ? conf.backup.fileName : 'Backup') + ' ' + new Date().toString() + '.tar.gz', fs.createReadStream('dump.tar.gz'));
 	}).then(() => {
 		console.log('backup success');
 		return exec('rm dump.tar.gz');
