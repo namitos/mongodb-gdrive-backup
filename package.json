@@ -1,11 +1,11 @@
 {
-	"name": "mongodb-gdrive-backup",
-	"version": "1.0.2",
-	"description": "Service that backups a datatabase to google drive",
-	"main": "index.js",
-	"dependencies": {
-		"googleapis": "12.4.x",
-		"moment": "x"
-	},
-	"author": "Artem Tankayan"
+  "name": "mongodb-gdrive-backup",
+  "version": "1.0.3",
+  "description": "Service that backups a datatabase to google drive",
+  "main": "index.js",
+  "dependencies": {
+    "googleapis": "25.x.x",
+    "moment": "x"
+  },
+  "author": "Artem Tankayan"
 }
