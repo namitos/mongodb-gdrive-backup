@@ -9,10 +9,10 @@ const conf = require(process.env.conf ? process.env.conf : './conf');
 let jwtClient = new google.auth.JWT(conf.googleServiceAccount.client_email, null, conf.googleServiceAccount.private_key, [
   'https://www.googleapis.com/auth/drive'
 ], null);
-google.options({auth: jwtClient});
+google.options({ auth: jwtClient });
 
 
-function sendBackup(emailToShare, name, buffer) {
+function sendBackup({ emailToShare, name, readStream }) {
   return new Promise((resolve, reject) => {
     jwtClient.authorize((err, tokens) => {
       if (err) {
@@ -26,14 +26,14 @@ function sendBackup(emailToShare, name, buffer) {
           },
           media: {
             mimeType: 'application/tar+gzip',
-            body: buffer
+            body: readStream
           }
-        }, function (err, file) {
+        }, function(err, file) {
           if (err) {
             reject(err);
           } else {
             drive.permissions.create({
-              fileId: file.id,
+              fileId: file.data.id,
               sendNotificationEmail: false,
               resource: {
                 role: 'reader',
@@ -65,9 +65,9 @@ function clean() {
     pageSize: 1000,
     q: "modifiedTime < '" + moment().subtract(conf.backup.deleteTimeout ? conf.backup.deleteTimeout : 14, 'days').format("YYYY-MM-DDTHH:mm:ss") + "'"
   }, (err, resp) => {
-    resp.files.forEach((file) => {
+    resp.data.files.forEach((file) => {
       drive.files.delete({
-        fileId: file.id
+        fileId: file.data.id
       }, (err, result) => {
         console.log(err, result)
       });
@@ -75,24 +75,29 @@ function clean() {
   });
 }
 
-function dump() {
-  exec(`mongodump --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
-    .then(() => sendBackup(conf.backup.shareTo, (conf.backup.fileName ? conf.backup.fileName : 'Backup') + ' ' + new Date().toString() + '.tar.gz', fs.createReadStream('dump.tar.gz')))
-    .then(() => exec('rm dump.tar.gz'))
-    .then(() => {
-      console.log('backup success');
-      clean();
-    })
-    .catch((err) => {
-      console.error('error:', err);
-      try {
-        if(err.errors[0].reason === 'storageQuotaExceeded') {
-          clean();
-        }
-      } catch (e) {
-        console.error('error:', err);
-      }
+async function dump() {
+  try {
+    await exec(`~/work/bin/mongodb/bin/mongodump  ${conf.mongo.db ? `--db ${conf.mongo.db}`: ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
+
+    await sendBackup({
+      emailToShare: conf.backup.shareTo,
+      name: (conf.backup.fileName ? conf.backup.fileName : 'Backup') + ' ' + new Date().toString() + '.tar.gz',
+      readStream: fs.createReadStream('./dump.tar.gz')
     });
+
+    await exec('rm dump.tar.gz');
+    console.log('backup success');
+    clean();
+  } catch (err) {
+    console.error('error:', err);
+    try {
+      if (err.errors[0].reason === 'storageQuotaExceeded') {
+        clean();
+      }
+    } catch (e) {
+      console.error('error:', err);
+    }
+  }
 }
 
 dump();

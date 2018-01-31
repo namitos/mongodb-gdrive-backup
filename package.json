@@ -4,7 +4,7 @@
   "description": "Service that backups a datatabase to google drive",
   "main": "index.js",
   "dependencies": {
-    "googleapis": "25.x.x",
+    "googleapis": "25.x",
     "moment": "x"
   },
   "author": "Artem Tankayan"
