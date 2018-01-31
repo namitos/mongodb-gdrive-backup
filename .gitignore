@@ -6,3 +6,4 @@ static/app-build
 .idea
 .DS_Store
 *.log
+package-lock.json
