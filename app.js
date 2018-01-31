@@ -4,6 +4,10 @@ const google = require('googleapis');
 const drive = google.drive('v3');
 const moment = require('moment');
 
+
+var followRedirects = require('follow-redirects');
+followRedirects.maxBodyLength = 200 * 1024 * 1024; // 200 MB
+
 const conf = require(process.env.conf ? process.env.conf : './conf');
 
 let jwtClient = new google.auth.JWT(conf.googleServiceAccount.client_email, null, conf.googleServiceAccount.private_key, [
@@ -44,7 +48,12 @@ function sendBackup({ emailToShare, name, readStream }) {
                 value: emailToShare
               }
             }, (err, res) => {
-              err ? reject(err) : resolve(res);
+              if (err) {
+                reject(err);
+              } else {
+                console.log('share success');
+                resolve(res);
+              }
             });
           }
         });
@@ -71,7 +80,11 @@ function clean() {
       drive.files.delete({
         fileId: file.id
       }, (err, result) => {
-        console.log(err)
+        if (err) {
+          console.error(err);
+        } else {
+          console.log('clean old file success');
+        }
       });
     });
   });
@@ -91,13 +104,13 @@ async function dump() {
     console.log('backup success');
     clean();
   } catch (err) {
-    console.error('error:');
+    console.error('error1:', err);
     try {
       if (err.errors[0].reason === 'storageQuotaExceeded') {
         clean();
       }
     } catch (e) {
-      console.error('error:');
+      console.error('error2:', err);
     }
   }
 }
