@@ -19,6 +19,7 @@ function sendBackup({ emailToShare, name, readStream }) {
         console.log('authorize', err);
         reject(err);
       } else {
+        console.log('authorize success');
         drive.files.create({
           resource: {
             name: name,
@@ -29,6 +30,7 @@ function sendBackup({ emailToShare, name, readStream }) {
             body: readStream
           }
         }, function(err, file) {
+          console.log('upload success');
           if (err) {
             reject(err);
           } else {
@@ -67,9 +69,9 @@ function clean() {
   }, (err, resp) => {
     resp.data.files.forEach((file) => {
       drive.files.delete({
-        fileId: file.data.id
+        fileId: file.id
       }, (err, result) => {
-        console.log(err, result)
+        console.log(err)
       });
     });
   });
@@ -77,8 +79,8 @@ function clean() {
 
 async function dump() {
   try {
-    await exec(`mongodump  ${conf.mongo.db ? `--db ${conf.mongo.db}`: ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
-
+    await exec(`mongodump ${conf.mongo.db ? `--db ${conf.mongo.db}`: ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
+    console.log('dump success');
     await sendBackup({
       emailToShare: conf.backup.shareTo,
       name: (conf.backup.fileName ? conf.backup.fileName : 'Backup') + ' ' + new Date().toString() + '.tar.gz',
@@ -89,13 +91,13 @@ async function dump() {
     console.log('backup success');
     clean();
   } catch (err) {
-    console.error('error:', err);
+    console.error('error:');
     try {
       if (err.errors[0].reason === 'storageQuotaExceeded') {
         clean();
       }
     } catch (e) {
-      console.error('error:', err);
+      console.error('error:');
     }
   }
 }
