@@ -77,7 +77,7 @@ function clean() {
 
 async function dump() {
   try {
-    await exec(`~/work/bin/mongodb/bin/mongodump  ${conf.mongo.db ? `--db ${conf.mongo.db}`: ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
+    await exec(`mongodump  ${conf.mongo.db ? `--db ${conf.mongo.db}`: ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`)
 
     await sendBackup({
       emailToShare: conf.backup.shareTo,
