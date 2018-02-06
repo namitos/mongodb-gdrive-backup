@@ -6,7 +6,7 @@ const moment = require('moment');
 
 
 var followRedirects = require('follow-redirects');
-followRedirects.maxBodyLength = 200 * 1024 * 1024; // 200 MB
+followRedirects.maxBodyLength = 2000 * 1024 * 1024; // 2000 MB
 
 const conf = require(process.env.conf ? process.env.conf : './conf');
 
