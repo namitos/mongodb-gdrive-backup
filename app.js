@@ -32,7 +32,7 @@ async function sendBackup({ emailToShare, name, readStream }) {
 
   for (let i = 0; i < emailToShare.length; i++) {
     const email = emailToShare[i];
-    await drive.permissions.create({
+    let r = await drive.permissions.create({
       fileId: file.data.id,
       sendNotificationEmail: false,
       resource: {
@@ -42,6 +42,7 @@ async function sendBackup({ emailToShare, name, readStream }) {
         value: email
       }
     });
+    console.log(`shared to ${email}`);
   }
   console.log('share ok');
 }
