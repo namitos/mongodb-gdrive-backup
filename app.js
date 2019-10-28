@@ -29,20 +29,20 @@ async function sendBackup({ emailToShare, name, readStream }) {
   if (typeof emailToShare === 'string') {
     emailToShare = [emailToShare];
   }
-  await Promise.all(
-    emailToShare.map((email) =>
-      drive.permissions.create({
-        fileId: file.data.id,
-        sendNotificationEmail: false,
-        resource: {
-          role: 'reader',
-          type: 'user',
-          emailAddress: email,
-          value: email
-        }
-      })
-    )
-  );
+
+  for (let i = 0; i < emailToShare.length; i++) {
+    const email = emailToShare[i];
+    await drive.permissions.create({
+      fileId: file.data.id,
+      sendNotificationEmail: false,
+      resource: {
+        role: 'reader',
+        type: 'user',
+        emailAddress: email,
+        value: email
+      }
+    });
+  }
   console.log('share ok');
 }
 
