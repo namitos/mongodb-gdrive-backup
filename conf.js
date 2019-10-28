@@ -1,6 +1,6 @@
 module.exports = {
   mongo: {
-    host: "mongo",
+    host: 'mongo',
     port: 27017,
     db: ''
   },
