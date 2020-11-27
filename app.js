@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const { google } = require('googleapis');
+const {google} = require('googleapis');
 const drive = google.drive('v3');
 const moment = require('moment');
 
@@ -10,9 +10,9 @@ const moment = require('moment');
 const conf = require(process.env.conf ? process.env.conf : './conf');
 
 let jwtClient = new google.auth.JWT(conf.googleServiceAccount.client_email, null, conf.googleServiceAccount.private_key, ['https://www.googleapis.com/auth/drive'], null);
-google.options({ auth: jwtClient });
+google.options({auth: jwtClient});
 
-async function sendBackup({ emailToShare, name, readStream }) {
+async function sendBackup({emailToShare, name, readStream}) {
   let tokens = await jwtClient.authorize();
   console.log('auth ok');
   let file = await drive.files.create({
@@ -90,7 +90,7 @@ async function clean() {
 
 async function dump() {
   try {
-    await exec(`mongodump ${conf.mongo.db ? `--db ${conf.mongo.db}` : ''} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`);
+    await exec(`mongodump ${conf.mongo.db ? `--db ${conf.mongo.db}` : ''} ${conf.mongo.username ? `--username ${conf.mongo.username}` : ""} ${conf.mongo.password ? `--password ${conf.mongo.password}` : ""} --host ${conf.mongo.host ? conf.mongo.host : '127.0.0.1'}:${conf.mongo.port ? conf.mongo.port : '27017'} && tar -cvzf dump.tar.gz dump && rm -rf dump`);
     console.log('dump success');
     await sendBackup({
       emailToShare: conf.backup.shareTo,
